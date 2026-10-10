@@ -1,0 +1,274 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile containing authentication details, personal information, and assigned role.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "name": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["student", "teacher", "admin"] },
+        "createdAt": { "type": "string" },
+        "classIds": { "type": "array" }
+      },
+      "required": ["id", "email", "name", "role", "createdAt"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "Academic subject curriculum managed by teachers.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "code": { "type": "string", "maxLength": 50 },
+        "description": { "type": "string", "maxLength": 500 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "teacherId", "createdAt"]
+    },
+    "Concept": {
+      "title": "Concept",
+      "description": "Granular learning concept with prerequisite relationships and curriculum map linkage.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 150 },
+        "code": { "type": "string", "maxLength": 50 },
+        "subjectId": { "type": "string", "maxLength": 128 },
+        "topic": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "prerequisites": { "type": "array" },
+        "difficultyLevel": { "type": "string", "enum": ["beginner", "intermediate", "advanced"] },
+        "teacherId": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["id", "name", "subjectId", "topic", "teacherId"]
+    },
+    "SchoolClass": {
+      "title": "SchoolClass",
+      "description": "Classroom cohort with assigned teacher and enrolled students.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "grade": { "type": "string", "maxLength": 50 },
+        "section": { "type": "string", "maxLength": 50 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "studentIds": { "type": "array" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "teacherId", "createdAt"]
+    },
+    "Assessment": {
+      "title": "Assessment",
+      "description": "Exam, quiz, or test defined with specific concept mappings and max marks.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "subjectId": { "type": "string", "maxLength": 128 },
+        "classId": { "type": "string", "maxLength": 128 },
+        "topicId": { "type": "string", "maxLength": 128 },
+        "conceptIds": { "type": "array" },
+        "maxMarks": { "type": "number" },
+        "assessmentDate": { "type": "string" },
+        "questions": { "type": "array" },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "title", "subjectId", "classId", "maxMarks", "questions", "teacherId", "createdAt"]
+    },
+    "MarkRecord": {
+      "title": "MarkRecord",
+      "description": "Student marks and question level breakdown from manual entry or assessment scan.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "assessmentId": { "type": "string", "maxLength": 128 },
+        "studentId": { "type": "string", "maxLength": 128 },
+        "studentName": { "type": "string", "maxLength": 100 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "marksObtained": { "type": "number" },
+        "maxMarks": { "type": "number" },
+        "percentage": { "type": "number" },
+        "questionScores": { "type": "array" },
+        "status": { "type": "string", "enum": ["draft", "confirmed"] },
+        "scannedImages": { "type": "array" },
+        "confirmedAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "assessmentId", "studentId", "teacherId", "marksObtained", "maxMarks", "percentage", "status"]
+    },
+    "GapAnalysis": {
+      "title": "GapAnalysis",
+      "description": "Concept-level learning gap analysis computed from verified assessment marks.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "studentId": { "type": "string", "maxLength": 128 },
+        "subjectId": { "type": "string", "maxLength": 128 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "weakConcepts": { "type": "array" },
+        "strongConcepts": { "type": "array" },
+        "overallMastery": { "type": "number" },
+        "recommendations": { "type": "array" },
+        "calculatedAt": { "type": "string" }
+      },
+      "required": ["id", "studentId", "subjectId", "teacherId", "overallMastery", "calculatedAt"]
+    },
+    "LessonPlan": {
+      "title": "LessonPlan",
+      "description": "Personalized or class lesson plan generated to close identified learning gaps.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "subjectId": { "type": "string", "maxLength": 128 },
+        "topic": { "type": "string", "maxLength": 150 },
+        "studentId": { "type": "string", "maxLength": 128 },
+        "classId": { "type": "string", "maxLength": 128 },
+        "targetConceptIds": { "type": "array" },
+        "level": { "type": "string", "enum": ["beginner", "intermediate", "advanced"] },
+        "learningObjectives": { "type": "array" },
+        "prerequisites": { "type": "array" },
+        "explanation": { "type": "string" },
+        "examples": { "type": "array" },
+        "activities": { "type": "array" },
+        "estimatedTime": { "type": "string", "maxLength": 50 },
+        "assessmentQuestions": { "type": "array" },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["draft", "assigned"] },
+        "assignedToStudentIds": { "type": "array" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "title", "subjectId", "topic", "level", "teacherId", "status", "createdAt"]
+    },
+    "LearningResource": {
+      "title": "LearningResource",
+      "description": "Generated or curated learning material like notes, slides, worksheets, quizzes, or presentations.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "lessonId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "type": { "type": "string", "enum": ["notes", "summary", "presentation", "worksheet", "quiz", "revision"] },
+        "content": { "type": "string" },
+        "slideData": { "type": "array" },
+        "conceptIds": { "type": "array" },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "assignedToStudentIds": { "type": "array" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "title", "type", "teacherId", "createdAt"]
+    },
+    "Assignment": {
+      "title": "Assignment",
+      "description": "Practice or reassessment tasks assigned to students with due date and grading keys.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "resourceId": { "type": "string", "maxLength": 128 },
+        "lessonId": { "type": "string", "maxLength": 128 },
+        "subjectId": { "type": "string", "maxLength": 128 },
+        "classId": { "type": "string", "maxLength": 128 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "targetConceptIds": { "type": "array" },
+        "dueDate": { "type": "string" },
+        "questions": { "type": "array" },
+        "assignedToStudentIds": { "type": "array" },
+        "isReassessment": { "type": "boolean" },
+        "originalAssessmentId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "title", "subjectId", "teacherId", "dueDate", "questions", "createdAt"]
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "Student responses to an assignment or reassessment with auto-graded or teacher-graded scores.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "assignmentId": { "type": "string", "maxLength": 128 },
+        "studentId": { "type": "string", "maxLength": 128 },
+        "studentName": { "type": "string", "maxLength": 100 },
+        "submittedAt": { "type": "string" },
+        "answers": { "type": "array" },
+        "totalScore": { "type": "number" },
+        "maxScore": { "type": "number" },
+        "percentage": { "type": "number" },
+        "status": { "type": "string", "enum": ["submitted", "graded"] },
+        "gradedBy": { "type": "string", "maxLength": 128 },
+        "gradedAt": { "type": "string" }
+      },
+      "required": ["id", "assignmentId", "studentId", "submittedAt", "totalScore", "maxScore", "status"]
+    },
+    "ProgressRecord": {
+      "title": "ProgressRecord",
+      "description": "Individual student completion tracking for lessons, quizzes, and reassessments.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "studentId": { "type": "string", "maxLength": 128 },
+        "lessonId": { "type": "string", "maxLength": 128 },
+        "resourceId": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["lesson_completed", "quiz_completed", "reassessment_completed"] },
+        "score": { "type": "number" },
+        "conceptIds": { "type": "array" },
+        "completedAt": { "type": "string" }
+      },
+      "required": ["id", "studentId", "type", "completedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles indexed by authentication UID."
+    },
+    "/subjects/{subjectId}": {
+      "schema": { "$ref": "#/entities/Subject" },
+      "description": "Subjects offered in the curriculum."
+    },
+    "/concepts/{conceptId}": {
+      "schema": { "$ref": "#/entities/Concept" },
+      "description": "Core concepts and their prerequisite relationships."
+    },
+    "/classes/{classId}": {
+      "schema": { "$ref": "#/entities/SchoolClass" },
+      "description": "Classroom groupings of students."
+    },
+    "/assessments/{assessmentId}": {
+      "schema": { "$ref": "#/entities/Assessment" },
+      "description": "Tests and exams created by teachers."
+    },
+    "/marks/{markId}": {
+      "schema": { "$ref": "#/entities/MarkRecord" },
+      "description": "Marks recorded per student per assessment."
+    },
+    "/gapAnalyses/{analysisId}": {
+      "schema": { "$ref": "#/entities/GapAnalysis" },
+      "description": "Learning gap analyses computed for students."
+    },
+    "/lessonPlans/{lessonId}": {
+      "schema": { "$ref": "#/entities/LessonPlan" },
+      "description": "AI-generated or teacher customized lesson plans."
+    },
+    "/resources/{resourceId}": {
+      "schema": { "$ref": "#/entities/LearningResource" },
+      "description": "Generated educational materials, slides, worksheets, quizzes."
+    },
+    "/assignments/{assignmentId}": {
+      "schema": { "$ref": "#/entities/Assignment" },
+      "description": "Assigned tasks, homework, and reassessments."
+    },
+    "/submissions/{submissionId}": {
+      "schema": { "$ref": "#/entities/Submission" },
+      "description": "Student work submissions and scores."
+    },
+    "/progressRecords/{progressId}": {
+      "schema": { "$ref": "#/entities/ProgressRecord" },
+      "description": "Student learning path activity completion logs."
+    }
+  }
+}

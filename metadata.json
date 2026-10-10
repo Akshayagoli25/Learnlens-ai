@@ -1,0 +1,10 @@
+{
+  "name": "LearnLens AI",
+  "description": "AI-powered personalized learning platform with assessment scanning, concept mapping, learning gap analysis, and tailored lesson generation.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

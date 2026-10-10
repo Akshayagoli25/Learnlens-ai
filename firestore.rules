@@ -1,0 +1,172 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == "goliakshaya07@gmail.com" ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isTeacher() {
+      return isSignedIn() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "teacher")
+      );
+    }
+
+    // Connection test document
+    match /test/{docId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Admin collection
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Users
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isTeacher() || isAdmin());
+      allow list: if isSignedIn() && (isTeacher() || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidId(userId) &&
+        (incoming().role == "student" || incoming().role == "teacher" || (incoming().role == "admin" && isAdmin()));
+      allow update: if isSignedIn() && isValidId(userId) && (
+        isAdmin() ||
+        (request.auth.uid == userId && incoming().role == existing().role)
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Subjects
+    match /subjects/{subjectId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isTeacher() || isAdmin();
+    }
+
+    // Concepts
+    match /concepts/{conceptId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isTeacher() || isAdmin();
+    }
+
+    // Classes
+    match /classes/{classId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isTeacher() || isAdmin();
+    }
+
+    // Assessments
+    match /assessments/{assessmentId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isTeacher() || isAdmin();
+    }
+
+    // Marks
+    match /marks/{markId} {
+      allow get: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isTeacher() ||
+        isAdmin()
+      );
+      allow list: if isSignedIn() && (
+        isTeacher() ||
+        isAdmin() ||
+        resource.data.studentId == request.auth.uid
+      );
+      allow create, update, delete: if isTeacher() || isAdmin();
+    }
+
+    // Learning Gap Analyses
+    match /gapAnalyses/{analysisId} {
+      allow get: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isTeacher() ||
+        isAdmin()
+      );
+      allow list: if isSignedIn() && (
+        isTeacher() ||
+        isAdmin() ||
+        resource.data.studentId == request.auth.uid
+      );
+      allow create, update, delete: if isTeacher() || isAdmin();
+    }
+
+    // Lesson Plans
+    match /lessonPlans/{lessonId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isTeacher() || isAdmin();
+    }
+
+    // Learning Resources
+    match /resources/{resourceId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isTeacher() || isAdmin();
+    }
+
+    // Assignments
+    match /assignments/{assignmentId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isTeacher() || isAdmin();
+    }
+
+    // Submissions
+    match /submissions/{submissionId} {
+      allow get: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isTeacher() ||
+        isAdmin()
+      );
+      allow list: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isTeacher() ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && incoming().studentId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        isTeacher() ||
+        isAdmin() ||
+        (resource.data.studentId == request.auth.uid && resource.data.status != "graded")
+      );
+      allow delete: if isTeacher() || isAdmin();
+    }
+
+    // Progress Records
+    match /progressRecords/{progressId} {
+      allow get, list: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isTeacher() ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && incoming().studentId == request.auth.uid;
+      allow update, delete: if isSignedIn() && (
+        isAdmin() ||
+        resource.data.studentId == request.auth.uid
+      );
+    }
+  }
+}
